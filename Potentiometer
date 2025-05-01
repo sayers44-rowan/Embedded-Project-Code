@@ -1,0 +1,109 @@
+#include <msp430.h>
+#include <stdint.h>
+#include "RGB_LED.h"   
+
+void pot_Init(void);
+uint16_t pot_Read(void);
+
+int main(void)
+{
+   WDTCTL = WDTPW | WDTHOLD;     // Stop watchdog timer
+
+   pot_Init();                  // Initialize potentiometer (P1.5 ADC)
+   initRGBLED();                // Initialize RGB LED PWM
+
+   PM5CTL0 &= ~LOCKLPM5;         // Unlock GPIOs
+
+   uint16_t potValue;
+
+   while (1)
+   {
+       potValue = pot_Read();    // Read potentiometer value (0-1023)
+
+       // Map potentiometer reading to RGB values
+       char red = (potValue >> 2) & 0xFF;    // Scale ADC 0-1023 to 0-255
+       char green = (~red) & 0xFF;            // Inverse of red
+       char blue = (red >> 1) & 0xFF;          // Half-intensity blue
+
+       setRGBLED(red, green, blue);           // Update RGB LED color
+
+       __delay_cycles(50000);                 // Small delay for stability
+   }
+}
+
+// Initialize P1.5 as ADC input
+void pot_Init(void)
+{
+   P1SEL0 |= BIT5;   // Set P1.5 to ADC input mode
+   P1SEL1 |= BIT5;
+
+   ADCCTL0 &= ~ADCENC;               // Disable ADC during configuration
+   ADCCTL0 = ADCSHT_2 | ADCON;        // Sample hold time, ADC ON
+   ADCCTL1 = ADCSHP | ADCCONSEQ_0;    // Sampling timer, single-channel
+   ADCCTL2 = ADCRES;                  // 10-bit resolution
+   ADCMCTL0 = ADCINCH_5;              // Select channel A5 (P1.5)
+}
+
+// Read from ADC channel A5 (P1.5)
+uint16_t pot_Read(void)
+{
+   ADCCTL0 |= ADCENC | ADCSC;         // Enable and start conversion
+   while (!(ADCIFG & ADCIFG0));       // Wait until conversion complete
+   return ADCMEM0;                    // Return ADC value (0-1023)
+}
+
+
+
+#include <msp430.h>
+#include <stdint.h>
+#include "RGB_LED.h"   
+
+void pot_Init(void);
+uint16_t pot_Read(void);
+
+int main(void)
+{
+   WDTCTL = WDTPW | WDTHOLD;     // Stop watchdog timer
+
+   pot_Init();                  // Initialize potentiometer (P1.5 ADC)
+   initRGBLED();                // Initialize RGB LED PWM
+
+   PM5CTL0 &= ~LOCKLPM5;         // Unlock GPIOs
+
+   uint16_t potValue;
+
+   while (1)
+   {
+       potValue = pot_Read();    // Read potentiometer value (0-1023)
+
+       // Map potentiometer reading to RGB values
+       char red = (potValue >> 2) & 0xFF;    // Scale ADC 0-1023 to 0-255
+       char green = (~red) & 0xFF;            // Inverse of red
+       char blue = (red >> 1) & 0xFF;          // Half-intensity blue
+
+       setRGBLED(red, green, blue);           // Update RGB LED color
+
+       __delay_cycles(50000);                 // Small delay for stability
+   }
+}
+
+// Initialize P1.5 as ADC input
+void pot_Init(void)
+{
+   P1SEL0 |= BIT5;   // Set P1.5 to ADC input mode
+   P1SEL1 |= BIT5;
+
+   ADCCTL0 &= ~ADCENC;               // Disable ADC during configuration
+   ADCCTL0 = ADCSHT_2 | ADCON;        // Sample hold time, ADC ON
+   ADCCTL1 = ADCSHP | ADCCONSEQ_0;    // Sampling timer, single-channel
+   ADCCTL2 = ADCRES;                  // 10-bit resolution
+   ADCMCTL0 = ADCINCH_5;              // Select channel A5 (P1.5)
+}
+
+// Read from ADC channel A5 (P1.5)
+uint16_t pot_Read(void)
+{
+   ADCCTL0 |= ADCENC | ADCSC;         // Enable and start conversion
+   while (!(ADCIFG & ADCIFG0));       // Wait until conversion complete
+   return ADCMEM0;                    // Return ADC value (0-1023)
+}
